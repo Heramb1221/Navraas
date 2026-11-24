@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Navraas – Table Orders (Demo)</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f2f1ef;--card:#fff;--ink:#1c1a1a;--mute:#6f6a6a;--line:#e3e0df;--red:#c8202f;--redbg:#fbe9eb;--grn:#1f7a4d;--grnbg:#e4f3eb;--amb:#9a6410;--ambbg:#fcefd2;--on:#fff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#151314;--card:#211e1f;--ink:#f1eeee;--mute:#a49d9d;--line:#383334;--red:#ef5360;--redbg:#3a1f23;--grn:#58c48c;--grnbg:#173226;--amb:#f0b653;--ambbg:#3a2d12}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#151314;--card:#211e1f;--ink:#f1eeee;--mute:#a49d9d;--line:#383334;--red:#ef5360;--redbg:#3a1f23;--grn:#58c48c;--grnbg:#173226;--amb:#f0b653;--ambbg:#3a2d12}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:500 15px/1.35 Outfit,system-ui,sans-serif;min-height:100vh}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+.wrap{max-width:720px;margin:0 auto;padding:0 16px 120px}
+header.top{display:flex;align-items:center;gap:12px;padding:18px 0 12px}
+.logo{font-weight:700;font-size:26px;letter-spacing:.5px;color:var(--red)}
+.tag{color:var(--mute);font-size:13px}
+.grow{flex:1}
+.ghost{padding:8px 12px;border:1px solid var(--line);border-radius:10px;font-size:13px;color:var(--mute)}
+h2{font-size:19px;margin:18px 0 10px}
+.legend{display:flex;gap:14px;font-size:13px;color:var(--mute);margin-bottom:12px;flex-wrap:wrap}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
+.tile{background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:14px;text-align:left;min-height:104px;display:flex;flex-direction:column;gap:4px}
+.tile b{font-size:22px}
+.tile.free{border-color:var(--grn);background:var(--grnbg)}
+.tile.run{border-color:var(--amb);background:var(--ambbg)}
+.tile small{color:var(--mute)}
+.tile .amt{font-size:17px;font-weight:700;margin-top:auto}
+.badge{align-self:flex-start;background:var(--red);color:var(--on);font-size:11px;padding:2px 8px;border-radius:20px}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding:12px 0 8px}
+.row{display:flex;align-items:center;gap:10px}
+.back{width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:var(--card);font-size:20px}
+input[type=search],input[type=text]{width:100%;padding:11px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;margin-top:10px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:10px 0 4px;scrollbar-width:none}
+.chip{white-space:nowrap;padding:8px 14px;border-radius:20px;border:1px solid var(--line);background:var(--card);font-size:14px}
+.chip.on{background:var(--red);border-color:var(--red);color:var(--on)}
+.item{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:11px 12px;margin-bottom:8px}
+.item .n{flex:1;min-width:0}
+.item .p{color:var(--mute);font-size:14px}
+.v{width:14px;height:14px;border:1.5px solid var(--grn);border-radius:3px;display:inline-grid;place-items:center;flex:none}
+.v::after{content:"";width:6px;height:6px;border-radius:50%;background:var(--grn)}
+.v.n{border-color:var(--red)}.v.n::after{background:var(--red)}
+.add{padding:8px 18px;border-radius:10px;border:1.5px solid var(--red);color:var(--red);font-weight:600}
+.step{display:flex;align-items:center;background:var(--red);color:var(--on);border-radius:10px;overflow:hidden}
+.step button{width:34px;height:34px;font-size:18px;color:var(--on)}
+.step span{min-width:24px;text-align:center;font-weight:700}
+.cart{position:fixed;left:0;right:0;bottom:0;padding:10px 16px calc(12px + env(safe-area-inset-bottom,0px));background:var(--bg);border-top:1px solid var(--line);z-index:6}
+.cart button,.btn{display:flex;justify-content:space-between;align-items:center;width:100%;max-width:720px;margin:0 auto;background:var(--red);color:var(--on);padding:14px 18px;border-radius:14px;font-weight:600;font-size:16px}
+.btn.alt{background:var(--card);color:var(--ink);border:1px solid var(--line);justify-content:center}
+.btn[disabled]{opacity:.45;cursor:default}
+.ovl{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:10;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--bg);width:100%;max-width:720px;max-height:90vh;overflow:auto;border-radius:20px 20px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px))}
+.line{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.line .n{flex:1}
+.pill{font-size:11px;padding:2px 8px;border-radius:20px;margin-left:6px}
+.pill.new{background:var(--redbg);color:var(--red)}.pill.sent{background:var(--grnbg);color:var(--grn)}
+.tot{display:flex;justify-content:space-between;padding:12px 0;font-weight:700;font-size:17px}
+.stack{display:grid;gap:10px;margin-top:6px}
+.empty{color:var(--mute);text-align:center;padding:30px 0}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:12px;z-index:20;font-size:14px}
+.receipt{background:#fff;color:#111;font:400 14px/1.4 "Courier Prime",ui-monospace,monospace;max-width:340px;margin:0 auto 14px;padding:18px 16px;border-radius:4px;box-shadow:0 2px 14px rgba(0,0,0,.25)}
+.receipt .c{text-align:center}.receipt h3{margin:0;font-size:19px}
+.receipt hr{border:0;border-top:1.5px solid #111;margin:8px 0}
+.receipt table{width:100%;border-collapse:collapse}
+.receipt td,.receipt th{padding:3px 0;vertical-align:top;text-align:right}
+.receipt td:first-child,.receipt th:first-child{text-align:left}
+.receipt .g{font-size:17px;font-weight:700}
+.receipt .meta{display:flex;justify-content:space-between}
+.stamp{color:#1f7a4d;font-weight:700;text-align:center;font-size:18px}
+@media print{body *{visibility:hidden}.receipt,.receipt *{visibility:visible}.receipt{position:absolute;left:0;top:0;box-shadow:none}}
+:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<div id="layer"></div>
+<script>
+const RAW=[
+["Biryani","Kolkata Chicken Biryani – Full|250|n;Kolkata Chicken Biryani – Half|160|n;Kolkata Chicken Biryani – Special|300|n;Kolkata Mutton Biryani – Full|400|n;Kolkata Mutton Biryani – Half|300|n;Kolkata Mutton Biryani – Special|500|n;Hyderabadi Chicken Biryani – Full|240|n;Hyderabadi Chicken Biryani – Half|160|n;Hyderabadi Mutton Biryani – Full|380|n;Hyderabadi Mutton Biryani – Half|280|n;Paneer / Veg Biryani|180|v;Kolkata Aloo Biryani|120|v;Kolkata Egg Biryani (2 egg)|140|n"],
+["Veg Sabzi","Aloo Jeera|80|v;Aloo Chokha|70|v;Aloo Gobi|100|v;Mutter Paneer|150|v;Paneer Makhanwala|250|v;Paneer Handi|220|v;Kadhai Paneer|220|v;Palak Paneer|200|v;Paneer Bhurji|220|v;Mushroom Masala|180|v;Mushroom Do Pyaaza|190|v;Kadhai Mushroom|190|v;Tawa Mix Vegetable|140|v;Chana Masala|130|v;Rajma Masala|130|v;Bhendi Masala|140|v"],
+["Non-Veg","Chicken Kasa (4 pcs)|250|n;Chicken Curry (4 pcs)|220|n;Chicken Tikka Butter Masala|240|n;Kadhai Chicken|240|n;Chicken Bharta|240|n;Chicken Do Pyaaza|260|n;Chicken Handi|300|n;Chicken Kolhapuri|280|n;Reshmi Tikka Masala|300|n;Dhaniya Chicken|260|n;Mutton Kasa (3 pcs)|360|n;Mutton Curry (3 pcs)|320|n;Mutton Do Pyaaza (3 pcs)|360|n;Mutton Rogan Josh (3 pcs)|360|n;Kadhai Mutton (3 pcs)|360|n;Egg Curry (2 pcs)|100|n;Egg Bhurji (double)|80|n;Egg Omelette|60|n;Egg Boiled (2)|40|n"],
+["Rolls & Snacks","Egg-Kathi Roll – Single|60|n;Egg-Kathi Roll – Double|90|n;Egg-Chicken Roll|120|n;Chicken-Kathi Roll|140|n;Kathi Paneer Roll|120|v;Paneer Wrap|100|v;French Fries – Small|60|v;French Fries – Large|90|v;Peri-Peri Fries – Small|80|v;Peri-Peri Fries – Large|110|v"],
+["Kebab & Tikka","Tandoori Chicken – Full|500|n;Tandoori Chicken – Half|250|n;Chicken Tikka|240|n;Chicken Reshmi|260|n;Chicken Malai|260|n;Chicken Hariyali|260|n;Chicken Lasuni|270|n;Chicken Banjara|270|n;Fish Tikka|320|n;Paneer Tikka|280|v;Mushroom Tikka|180|v"],
+["Thalis","Veg Thali|100|v;Special Veg Thali|120|v;Veg Mini Meal|75|v;Chicken Thali|160|n;Egg Masala Thali|140|n;Mutton Masala Thali|250|n;Special Chicken Masala Thali|240|n;Special Egg Masala Thali|200|n;Special Mutton Masala Thali|360|n;Bengali Veg Thali|220|v;Bengali Chicken Thali|280|n;Bengali Mutton Thali|360|n;Bengali Egg Thali|240|n;Bengali Chingri Malai Thali|340|n;Healthy Bowl – Veg|120|v;Healthy Bowl – Non-Veg|150|n"],
+["Rice & Dal","Dal-Khichdi (papad, raita)|120|v;Steam Rice – Full|60|v;Steam Rice – Half|30|v;Peas Pulao|100|v;Jeera Rice|90|v;Vegetable Pulao|100|v;Yellow Dal|70|v;Dal Fry|80|v;Dal Makhani|120|v;Dal Tadka|100|v"],
+["Breads","Plain Chapati|12|v;Tandoor Roti|20|v;Tandoor Roti – Butter|25|v;Tandoor Laccha Paratha|40|v;Naan|40|v;Naan – Butter|50|v;Garlic Naan|60|v;Stuffed Kulcha|70|v;Cheese Naan|120|v;Paneer Kulcha|90|v;Luchi (4 pcs)|50|v"],
+["Combo Meals","Veg Fried Rice + Veg Manchurian / Chilli Paneer|120|v;Egg Fried Rice + Chicken Manchurian / Chilli Chicken|140|n;Chicken Fried Rice + Paneer / Chicken / Veg|160|n;Veg Noodles + Veg Manchurian / Chilli Paneer|140|v;Egg Noodles + Chicken Manchurian / Chilli Chicken|140|n;Chicken Noodles + Paneer / Chicken / Veg|160|n;Jeera Rice + Chicken Kasa / Mutter Paneer|140|n;Steam Rice + Chicken Curry / Mix Veg|140|n;Chhole Chawal / Rajma Chawal|130|v"]
+];
+const CATS=RAW.map(r=>r[0]);
+const ITEMS=[];RAW.forEach(([c,s])=>s.split(";").forEach(x=>{const[a,b,d]=x.split("|");ITEMS.push({id:ITEMS.length,c,n:a,p:+b,v:d==="v"})}));
+const idOf=n=>ITEMS.findIndex(x=>x.n===n);
+const TABLES=10,KEY="navraas-demo-v1";
+let S,cur=null,cat=CATS[0],q="";
+function seed(){const m=60000,now=Date.now();
+ return{bill:1810,t:{
+  3:{at:now-38*m,l:{[idOf("Kolkata Chicken Biryani – Full")]:{q:2,s:2},[idOf("Mutter Paneer")]:{q:1,s:1},[idOf("Tandoor Roti")]:{q:4,s:4},[idOf("Egg Omelette")]:{q:1,s:0}}},
+  6:{at:now-12*m,l:{[idOf("Special Veg Thali")]:{q:2,s:2}}}}}}
+try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+if(!S||!S.t)S=seed();
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const $=s=>document.querySelector(s),inr=n=>"₹"+n.toLocaleString("en-IN");
+const lines=n=>Object.entries(S.t[n]?.l||{}).map(([id,o])=>({...ITEMS[id],...o}));
+const sub=n=>lines(n).reduce((a,l)=>a+l.p*l.q,0);
+const cnt=n=>lines(n).reduce((a,l)=>a+l.q,0);
+const fresh=n=>lines(n).reduce((a,l)=>a+l.q-l.s,0);
+function toast(m){const t=document.createElement("div");t.className="toast";t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),1800)}
+
+function home(){cur=null;$("#layer").innerHTML="";
+ let h=`<header class="top"><div><div class="logo">navraas</div><div class="tag">Good food. Great flavours. Every day.</div></div><div class="grow"></div><button class="ghost" data-a="reset">Reset demo</button></header>
+ <h2>Tables</h2><div class="legend"><span><i class="dot" style="background:var(--grn)"></i>Free</span><span><i class="dot" style="background:var(--amb)"></i>Running</span><span>Tap a table to take an order</span></div><div class="grid">`;
+ for(let n=1;n<=TABLES;n++){const run=cnt(n)>0,f=fresh(n),min=run?Math.max(1,Math.round((Date.now()-S.t[n].at)/60000)):0;
+  h+=`<button class="tile ${run?"run":"free"}" data-a="open" data-n="${n}"><b>Table ${n}</b>${run?`<small>${cnt(n)} items · ${min} min</small>${f?`<span class="badge">${f} not sent</span>`:""}<span class="amt">${inr(sub(n))}</span>`:`<small>Free</small>`}</button>`}
+ $("#app").innerHTML=h+"</div>"}
+
+function order(n){cur=n;$("#app").innerHTML=`<div class="bar"><div class="row"><button class="back" data-a="home" aria-label="Back to tables">←</button><div><b style="font-size:19px">Table ${n}</b><div class="tag">Waiter: Rahul</div></div></div>
+ <input type="search" id="q" placeholder="Search dishes" value="${q}"><div class="chips" id="chips"></div></div><div id="list"></div><div class="cart" id="cart"></div>`;
+ $("#q").oninput=e=>{q=e.target.value;list()};upd()}
+function upd(){
+ $("#chips").innerHTML=CATS.map(c=>`<button class="chip ${c===cat&&!q?"on":""}" data-a="cat" data-c="${c}">${c}</button>`).join("");
+ list();const c=cnt(cur),s=sub(cur);
+ $("#cart").innerHTML=c?`<button data-a="sheet"><span>View order · ${c} items</span><span>${inr(s)}</span></button>`:`<button data-a="sheet" style="opacity:.6"><span>No items yet</span><span>${inr(0)}</span></button>`}
+function list(){const t=q.trim().toLowerCase(),L=S.t[cur]?.l||{};
+ const it=ITEMS.filter(x=>t?x.n.toLowerCase().includes(t):x.c===cat);
+ $("#list").innerHTML=it.length?it.map(x=>{const o=L[x.id];
+  return`<div class="item"><span class="v ${x.v?"":"n"}"></span><div class="n">${x.n}<div class="p">${inr(x.p)}</div></div>${o?`<div class="step"><button data-a="dec" data-id="${x.id}" aria-label="Remove one">−</button><span>${o.q}</span><button data-a="inc" data-id="${x.id}" aria-label="Add one">+</button></div>`:`<button class="add" data-a="inc" data-id="${x.id}">Add</button>`}</div>`}).join(""):`<div class="empty">No dish matches “${q}”.</div>`}
+
+function chg(id,d){const T=S.t[cur]||(S.t[cur]={at:Date.now(),l:{}});const o=T.l[id]||(T.l[id]={q:0,s:0});o.q+=d;
+ if(o.q<=0)delete T.l[id];else o.s=Math.min(o.s,o.q);
+ if(!Object.keys(T.l).length)delete S.t[cur];save();upd();if($(".sheet"))sheet()}
+
+function sheet(){const L=lines(cur),f=fresh(cur);
+ $("#layer").innerHTML=`<div class="ovl" data-a="close"><div class="sheet"><div class="row"><h2 style="margin:0">Table ${cur} · Order</h2><div class="grow"></div><button class="ghost" data-a="close">Close</button></div>
+ ${L.length?L.map(l=>`<div class="line"><span class="v ${l.v?"":"n"}"></span><div class="n">${l.n}<span class="pill ${l.q>l.s?"new":"sent"}">${l.q>l.s?(l.s?`${l.q-l.s} new`:"New"):"Sent"}</span><div class="p tag">${inr(l.p)} × ${l.q}</div></div><div class="step"><button data-a="dec" data-id="${l.id}" aria-label="Remove one">−</button><span>${l.q}</span><button data-a="inc" data-id="${l.id}" aria-label="Add one">+</button></div><b style="min-width:62px;text-align:right">${inr(l.p*l.q)}</b></div>`).join(""):`<div class="empty">Nothing ordered yet. Close this and tap Add on a dish.</div>`}
+ <div class="tot"><span>Subtotal</span><span>${inr(sub(cur))}</span></div>
+ <div class="stack"><button class="btn" data-a="kot" ${f?"":"disabled"} style="justify-content:center">Send to kitchen${f?` (${f} new)`:""}</button><button class="btn alt" data-a="bill" ${L.length?"":"disabled"}>Generate bill</button></div></div></div>`}
+
+const pad=x=>String(x).padStart(2,"0");
+function bill(){const T=S.t[cur];if(!T.bn)T.bn=S.bill++;save();
+ const L=lines(cur),s=sub(cur),tx=Math.round(s*2.5)/100,gt=s+tx*2,ro=Math.round(gt)-gt,d=new Date(),f2=x=>x.toFixed(2);
+ const ds=`${pad(d.getDate())}/${pad(d.getMonth()+1)}/${String(d.getFullYear()).slice(2)}`,ts=`${pad(d.getHours())}:${pad(d.getMinutes())}`;
+ $("#layer").innerHTML=`<div class="ovl" data-a="close"><div class="sheet" id="bs">
+ <div class="receipt" id="rc"><div class="c"><h3>Navraas</h3>Veg &amp; Non-Veg · Kolkata Specials<br>Ph: 8450966383</div><hr>
+ <div>Name:</div><hr><div class="meta"><span>Date: ${ds}<br>${ts}</span><b>Dine In: T${cur}<br>Bill No.: ${T.bn}</b></div><div>Cashier: biller</div><hr>
+ <table><tr><th>Item</th><th>Qty.</th><th>Price</th><th>Amount</th></tr>${L.map(l=>`<tr><td>${l.n}</td><td>${l.q}</td><td>${f2(l.p)}</td><td>${f2(l.p*l.q)}</td></tr>`).join("")}</table><hr>
+ <table><tr><td>Total Qty: ${cnt(cur)}</td><td>Sub Total</td><td>${f2(s)}</td></tr><tr><td></td><td>CGST@2.5 2.5%</td><td>${f2(tx)}</td></tr><tr><td></td><td>SGST@2.5 2.5%</td><td>${f2(tx)}</td></tr><tr><td></td><td>Round off</td><td>${f2(ro)}</td></tr></table><hr>
+ <table><tr class="g"><td>Grand Total</td><td>₹ ${f2(Math.round(gt))}</td></tr></table>
+ <div id="ps">Not Paid</div><hr><div class="c">Thanks &amp; Visit Again!!</div></div>
+ <div class="stack"><button class="btn" data-a="pay" style="justify-content:center">Mark as paid · ${inr(Math.round(gt))}</button><button class="btn alt" data-a="print">Print bill</button><button class="btn alt" data-a="sheet">Back to order</button></div></div></div>`}
+
+function kot(){const T=S.t[cur],nw=lines(cur).filter(l=>l.q>l.s).map(l=>({...l,d:l.q-l.s}));
+ S.kn=(S.kn||100)+1;Object.values(T.l).forEach(o=>o.s=o.q);save();upd();
+ const d=new Date(),ds=`${pad(d.getDate())}/${pad(d.getMonth()+1)}/${String(d.getFullYear()).slice(2)}`,ts=`${pad(d.getHours())}:${pad(d.getMinutes())}`;
+ $("#layer").innerHTML=`<div class="ovl" data-a="close"><div class="sheet"><div class="receipt"><div class="c"><h3>Navraas · Kitchen Order</h3>KOT No.: ${S.kn}</div><hr><div class="meta"><span>Table: T${cur}</span><span>${ds} ${ts}</span></div><div>Waiter: Rahul</div><hr><table><tr><th>Item</th><th>Qty.</th></tr>${nw.map(l=>`<tr><td>${l.n}</td><td>${l.d}</td></tr>`).join("")}</table><hr><div class="c">Total items: ${nw.reduce((a,l)=>a+l.d,0)}<br>Sent to kitchen ✓</div></div><div class="stack"><button class="btn" data-a="bill" style="justify-content:center">Generate bill</button><button class="btn alt" data-a="print">Print KOT</button><button class="btn alt" data-a="sheet">Back to order</button></div></div></div>`}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-a]");if(!b)return;const a=b.dataset.a,id=+b.dataset.id;
+ if(a==="open"){q="";order(+b.dataset.n)}
+ else if(a==="home"){home()}
+ else if(a==="cat"){cat=b.dataset.c;upd()}
+ else if(a==="inc")chg(id,1);else if(a==="dec")chg(id,-1);
+ else if(a==="sheet")sheet();
+ else if(a==="close"){if(e.target===b||b.tagName==="BUTTON")$("#layer").innerHTML=""}
+ else if(a==="kot")kot();
+ else if(a==="bill")bill();
+ else if(a==="print")window.print();
+ else if(a==="pay"){const n=cur;delete S.t[n];save();home();toast(`Table ${n} settled · ready for next guests`)}
+ else if(a==="reset"){S=seed();save();home()}
+});
+home();
+</script>
+</body>
+</html>
